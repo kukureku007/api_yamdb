@@ -1,19 +1,19 @@
 from django.urls import include, path
 from rest_framework import routers
 
-# from .views import TitleViewSet
+from .views import UserViewSet
 
 
 app_name = 'api'
 
 router_v1 = routers.DefaultRouter()
 
-# Пример работы с роутером
-# router_v1.register(
-    # r'(?P<version>v1)/titles',
-    # TitleViewSet,
-    # basename='api-v1-title'
-# )
+
+router_v1.register(
+    r'(?P<version>v1)/users',
+    UserViewSet,
+    basename='api-v1-user'
+)
 
 urlpatterns = [
     # path('auth/', include('djoser.urls')),  # создание нового пользователя
