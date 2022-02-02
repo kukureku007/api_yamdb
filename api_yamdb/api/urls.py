@@ -1,7 +1,14 @@
 from django.urls import include, path
 from rest_framework import routers
+from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .views import UserViewSet, CategoryViewSet, GenreViewSet, TitleViewSet
+from .views import (
+    UserViewSet,
+    CategoryViewSet,
+    GenreViewSet,
+    TitleViewSet,
+    # signup
+)
 
 
 app_name = 'api'
@@ -31,7 +38,12 @@ router_v1.register(
 )
 
 urlpatterns = [
-    # path('auth/', include('djoser.urls')),  # создание нового пользователя
-    # path('v1/', include('djoser.urls.jwt')),  # jwt token create
+    # path('v1/auth/signup/', signup, name='api-signup'),
+    # временный способ получения токенов
+    path(
+        'v1/auth/token/',
+        TokenObtainPairView.as_view(),
+        name='token_obtain_pair'
+    ),
     path('', include(router_v1.urls)),
 ]
