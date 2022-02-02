@@ -21,16 +21,34 @@ class User(AbstractUser):
     )
 
 
-class Title():
-    pass
+class Category(models.Model):
+    name = models.CharField(max_length=50)
+    slug = models.SlugField(unique=True)
 
 
-class Category():
-    pass
+class Genre(models.Model):
+    name = models.CharField(max_length=50)
+    slug = models.SlugField(unique=True)
 
 
-class Genre():
-    pass
+class Title(models.Model):
+    name = models.CharField(max_length=50)
+    year = models.IntegerField()
+    description = models.TextField()
+    genre = models.ForeignKey(
+        Genre,
+        on_delete=models.SET_NULL,
+        related_name='titles',
+        blank=True,
+        null=True
+    )
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        related_name='titles',
+        blank=True,
+        null=True
+    )
 
 
 class Review():
