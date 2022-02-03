@@ -20,6 +20,9 @@ class User(AbstractUser):
         blank=True,
     )
 
+    class Meta:
+        ordering = ('-date_joined',)
+
 
 class Category(models.Model):
     name = models.CharField(max_length=50)

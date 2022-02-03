@@ -1,16 +1,12 @@
-<<<<<<< HEAD
-from rest_framework import viewsets
 # from rest_framework.decorators import api_view, permission_classes
 # from rest_framework.permissions import AllowAny
 # from rest_framework.response import Response
-=======
-from rest_framework import viewsets, filters
+from django.shortcuts import get_object_or_404
+from rest_framework import viewsets, mixins, filters
 from rest_framework.permissions import IsAdminUser
-from api.permissions import AdminOrReadOnly
+from api.permissions import AdminOrReadOnly, AdminOnly, AuthorOnly
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
->>>>>>> Charaev
-
 
 from reviews.models import (
     User,
@@ -30,6 +26,22 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     lookup_field = 'username'
+    permission_classes = (AdminOnly,)
+    pagination_class = PageNumberPagination
+
+
+# всё нерабочее! другие миксины/роутер или свой класс?
+class UserMeViewSet(
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    viewsets.GenericViewSet
+):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (AuthorOnly,)
+
+    def get_queryset(self):
+        return get_object_or_404(User, username=self.request.user.username)
 
 
 # @api_view(('POST',))
