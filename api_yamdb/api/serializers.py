@@ -4,6 +4,7 @@ from reviews.models import User, Category, Genre, Title
 
 
 class UserSerializer(serializers.ModelSerializer):
+
     class Meta:
         fields = (
             'id',

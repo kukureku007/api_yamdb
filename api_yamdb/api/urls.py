@@ -7,6 +7,7 @@ from .views import (
     CategoryViewSet,
     GenreViewSet,
     TitleViewSet,
+    UserMeViewSet,
     # signup
 )
 
@@ -20,6 +21,11 @@ router_v1.register(
     r'(?P<version>v1)/users',
     UserViewSet,
     basename='api-v1-user'
+)
+router_v1.register(
+    r'(?P<version>v1)/users/me',
+    UserMeViewSet,
+    basename='api-v1-me-user'
 )
 router_v1.register(
     r'v1/categories',
