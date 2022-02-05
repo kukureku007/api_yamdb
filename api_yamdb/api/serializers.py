@@ -1,11 +1,13 @@
 from rest_framework import serializers
 from django.db.models import Avg
 from reviews.models import User, Category, Genre, Title
+from rest_framework.validators import UniqueValidator
 
 
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
+        model = User
         fields = (
             'id',
             'username',
@@ -15,7 +17,32 @@ class UserSerializer(serializers.ModelSerializer):
             'bio',
             'role'
         )
+
+
+class UserSignupSerializer(serializers.ModelSerializer):
+    RESTRICTED_USERNAMES = (
+        'me',
+    )
+    email = serializers.EmailField(
+        required=True,
+        validators=(UniqueValidator(
+            queryset=User.objects.all()),
+        )
+    )
+
+    class Meta:
         model = User
+        fields = (
+            'username',
+            'email',
+        )
+
+    def validate_username(self, value):
+        if value in self.RESTRICTED_USERNAMES:
+            raise serializers.ValidationError(
+                'This username is restricted. Try another one!'
+            )
+        return value
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -37,7 +64,7 @@ class TitleGetSerializer(serializers.ModelSerializer):
         queryset=Genre.objects.all(),
         slug_field='slug',
         many=True,
-        )
+    )
 
     category = CategorySerializer()
 
@@ -49,7 +76,7 @@ class TitleGetSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'year',
-           # 'rating'
+            # 'rating'
             'description',
             'genre',
             'category'
@@ -58,7 +85,6 @@ class TitleGetSerializer(serializers.ModelSerializer):
 
 
 class TitlePostSerializer(TitleGetSerializer):
-    
     category = serializers.SlugRelatedField(
         queryset=Category.objects.all(),
         slug_field='slug'

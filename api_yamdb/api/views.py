@@ -3,9 +3,13 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, mixins, filters
-from api.permissions import AdminOrReadOnly, AdminOnly, AuthorOnly, AllowAny
+from api.permissions import AdminOrReadOnly, AdminOnly, AuthorOnly
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework import status
 
 from reviews.models import (
     User,
@@ -19,7 +23,8 @@ from .serializers import (
     TitlePostSerializer,
     UserSerializer,
     CategorySerializer,
-    GenreSerializer
+    GenreSerializer,
+    UserSignupSerializer
 )
 
 
@@ -48,7 +53,34 @@ class UserMeViewSet(
 @api_view(('POST',))
 @permission_classes((AllowAny,))
 def signup(request):
+    serializer = UserSignupSerializer(data=request.data)
 
+    if serializer.is_valid():
+        user = serializer.save()
+        user.is_active = False
+        user.save()
+        token = default_token_generator.make_token(user)
+        # форматирование письма
+        send_mail(
+            "Your confirmation-code",
+            token,
+            "server-django@example.com",
+            [user.email],
+            fail_silently=False,
+        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(('POST',))
+@permission_classes((AllowAny,))
+def token(request):
+    # получаю username и confirmation_code ищ сериалайзера
+    # is_active = True ??
+    # default_token_generator.check_token(user, token)
+    # refresh = RefreshToken.for_user(user)
+    # Ответ - JWT токен
+    # print(refresh, "-----", refresh.access_token)
     if request.method == 'POST':
         return Response({'message': 'Получены данные', 'data': request.data})
 

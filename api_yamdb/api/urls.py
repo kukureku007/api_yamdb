@@ -8,7 +8,8 @@ from .views import (
     GenreViewSet,
     TitleViewSet,
     UserMeViewSet,
-    # signup
+    signup,
+    token
 )
 
 
@@ -44,10 +45,11 @@ router_v1.register(
 )
 
 urlpatterns = [
-    # path('v1/auth/signup/', signup, name='api-signup'),
+    path('v1/auth/signup/', signup, name='api-signup'),
+    path('v1/auth/token/', token, name='api-token'),
     # временный способ получения токенов
     path(
-        'v1/auth/token/',
+        'v1/auth/token-old/',
         TokenObtainPairView.as_view(),
         name='token_obtain_pair'
     ),
