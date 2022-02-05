@@ -1,26 +1,11 @@
-<<<<<<< HEAD
-from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, filters
-from rest_framework.permissions import IsAdminUser
-from api.permissions import AdminOrReadOnly, AdminOnly, ReadOnly
-from rest_framework.pagination import PageNumberPagination
-from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework import status
-# from rest_framework.decorators import api_view, permission_classes
-# from rest_framework.permissions import AllowAny
-# from rest_framework.response import Respo
-=======
-# from rest_framework.decorators import api_view, permission_classes
-# from rest_framework.permissions import AllowAny
-# from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, mixins, filters
-from rest_framework.permissions import IsAdminUser
-from api.permissions import AdminOrReadOnly, AdminOnly, AuthorOnly
+from api.permissions import AdminOrReadOnly, AdminOnly, AuthorOnly, AllowAny
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
->>>>>>> 6641783050c14c6b2260ee0e6365e39a9f70ab88
 
 from reviews.models import (
     User,
@@ -60,14 +45,14 @@ class UserMeViewSet(
         return get_object_or_404(User, username=self.request.user.username)
 
 
-# @api_view(('POST',))
-# @permission_classes((AllowAny,))
-# def signup(request):
+@api_view(('POST',))
+@permission_classes((AllowAny,))
+def signup(request):
 
-#     if request.method == 'POST':
-#         return Response({'message': 'Получены данные', 'data': request.data})
+    if request.method == 'POST':
+        return Response({'message': 'Получены данные', 'data': request.data})
 
-#     return Response({'message': 'Это был GET-запрос!'})
+    return Response({'message': 'Это был GET-запрос!'})
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
