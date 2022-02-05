@@ -24,7 +24,8 @@ from .serializers import (
     UserSerializer,
     CategorySerializer,
     GenreSerializer,
-    UserSignupSerializer
+    UserSignupSerializer,
+    UserTokenSerializer
 )
 
 
@@ -33,7 +34,8 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     lookup_field = 'username'
     permission_classes = (AdminOnly,)
-    pagination_class = PageNumberPagination
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('username',)
 
 
 # всё нерабочее! другие миксины/роутер или свой класс?
@@ -57,7 +59,7 @@ def signup(request):
 
     if serializer.is_valid():
         user = serializer.save()
-        user.is_active = False
+        user.is_active = False  # default in serializer
         user.save()
         token = default_token_generator.make_token(user)
         # форматирование письма
@@ -75,16 +77,17 @@ def signup(request):
 @api_view(('POST',))
 @permission_classes((AllowAny,))
 def token(request):
-    # получаю username и confirmation_code ищ сериалайзера
-    # is_active = True ??
-    # default_token_generator.check_token(user, token)
-    # refresh = RefreshToken.for_user(user)
-    # Ответ - JWT токен
-    # print(refresh, "-----", refresh.access_token)
-    if request.method == 'POST':
-        return Response({'message': 'Получены данные', 'data': request.data})
-
-    return Response({'message': 'Это был GET-запрос!'})
+    serializer = UserTokenSerializer(data=request.data)
+    # перенести всё в валидацию сериалайзера.
+    if serializer.is_valid():
+        user = get_object_or_404(User, username=serializer.data['username'])
+        confirmation_code = serializer.data['confirmation_code']
+        if default_token_generator.check_token(user, confirmation_code):
+            refresh = RefreshToken.for_user(user)
+            return Response(
+                {'token': str(refresh.access_token)}
+            )
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CategoryViewSet(viewsets.ModelViewSet):

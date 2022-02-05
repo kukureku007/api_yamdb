@@ -5,17 +5,22 @@ from rest_framework.validators import UniqueValidator
 
 
 class UserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(
+        required=True,
+        validators=(UniqueValidator(
+            queryset=User.objects.all()),
+        )
+    )
 
     class Meta:
         model = User
         fields = (
-            'id',
             'username',
             'email',
+            'role',
             'first_name',
             'last_name',
             'bio',
-            'role'
         )
 
 
@@ -43,6 +48,19 @@ class UserSignupSerializer(serializers.ModelSerializer):
                 'This username is restricted. Try another one!'
             )
         return value
+
+
+class UserTokenSerializer(serializers.Serializer):
+    username = serializers.CharField(required=True)
+    confirmation_code = serializers.CharField(required=True)
+
+    # class Meta:
+    #     model = User
+    #     fields = (
+    #         'username',
+    #         'confirmation_code'
+    #     )
+    #     read_only_fields = ('username',)
 
 
 class CategorySerializer(serializers.ModelSerializer):
