@@ -37,6 +37,7 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (AdminOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
+    # TODO username 'me' in CONST
 
     def get_permissions(self):
         if (
@@ -56,11 +57,10 @@ class UserViewSet(viewsets.ModelViewSet):
             return UserSerializerReadOnlyRole
         return super().get_serializer_class()
 
-    # TODO version и другие доп аргументы - будет ошибка
-    def destroy(self, request, username):
-        if username == 'me':
+    def destroy(self, request, *args, **kwargs):
+        if self.kwargs['username'] == 'me':
             return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        return super().destroy(self, request, username)
+        return super().destroy(request, *args, **kwargs)
 
 
 @api_view(('POST',))
@@ -70,7 +70,7 @@ def signup(request):
 
     if serializer.is_valid():
         user = serializer.save()
-        user.is_active = False  # TODO default in serializer
+        user.is_active = False
         user.save()
         token = default_token_generator.make_token(user)
         # TODO форматирование письма  декоратор для токена и эмеил ?
@@ -89,17 +89,14 @@ def signup(request):
 @permission_classes((AllowAny,))
 def token(request):
     serializer = UserTokenSerializer(data=request.data)
-    # TODO перенести всё в валидацию сериалайзера.
     if serializer.is_valid():
         user = get_object_or_404(User, username=serializer.data['username'])
-        confirmation_code = serializer.data['confirmation_code']
-        if default_token_generator.check_token(user, confirmation_code):
-            user.is_active = True  # TODO default in serializer
-            user.save()
-            refresh = RefreshToken.for_user(user)
-            return Response(
-                {'token': str(refresh.access_token)}
-            )
+        user.is_active = True
+        user.save()
+        refresh = RefreshToken.for_user(user)
+        return Response(
+            {'token': str(refresh.access_token)}
+        )
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

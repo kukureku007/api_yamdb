@@ -6,7 +6,6 @@ from .views import (
     CategoryViewSet,
     GenreViewSet,
     TitleViewSet,
-    # UserMeViewSet,
     signup,
     token
 )
@@ -17,8 +16,8 @@ app_name = 'api'
 router_v1 = routers.DefaultRouter()
 
 router_v1.register(
-    # r'(?P<version>v1)/users',
-    r'v1/users',
+    r'(?P<version>v1)/users',
+    # r'v1/users',
     UserViewSet,
     basename='api-v1-user'
 )

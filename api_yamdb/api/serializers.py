@@ -2,6 +2,8 @@ from rest_framework import serializers
 from django.db.models import Avg
 from reviews.models import User, Category, Genre, Title
 from rest_framework.validators import UniqueValidator
+from django.contrib.auth.tokens import default_token_generator
+from django.shortcuts import get_object_or_404
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -58,6 +60,17 @@ class UserSignupSerializer(serializers.ModelSerializer):
 class UserTokenSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     confirmation_code = serializers.CharField(required=True)
+
+    def validate(self, data):
+        user = get_object_or_404(User, username=data['username'])
+        if not default_token_generator.check_token(
+            user,
+            data['confirmation_code']
+        ):
+            raise serializers.ValidationError(
+                'This confirmation_code is invalid'
+            )
+        return data
 
 
 class CategorySerializer(serializers.ModelSerializer):
