@@ -24,6 +24,11 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
 
+class UserSerializerReadOnlyRole(UserSerializer):
+    class Meta(UserSerializer.Meta):
+        read_only_fields = ('role',)
+
+
 class UserSignupSerializer(serializers.ModelSerializer):
     RESTRICTED_USERNAMES = (
         'me',

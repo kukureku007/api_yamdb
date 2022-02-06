@@ -1,9 +1,9 @@
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, mixins, filters
-from api.permissions import AdminOrReadOnly, AdminOnly, AuthorOnly
+from rest_framework import viewsets, filters
+from api.permissions import AdminOrReadOnly, AdminOnly
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.auth.tokens import default_token_generator
@@ -22,6 +22,7 @@ from .serializers import (
     TitleGetSerializer,
     TitlePostSerializer,
     UserSerializer,
+    UserSerializerReadOnlyRole,
     CategorySerializer,
     GenreSerializer,
     UserSignupSerializer,
@@ -37,19 +38,29 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
 
+    def get_permissions(self):
+        if (
+            self.action in ('retrieve', 'partial_update', 'destroy')
+            and self.kwargs['username'] == 'me'
+        ):
+            return (IsAuthenticated(),)
+        return super().get_permissions()
 
-# всё нерабочее! другие миксины/роутер или свой класс?
-class UserMeViewSet(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet
-):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = (AuthorOnly,)
+    def get_object(self):
+        if self.kwargs['username'] == 'me':
+            return get_object_or_404(User, username=self.request.user.username)
+        return super().get_object()
 
-    def get_queryset(self):
-        return get_object_or_404(User, username=self.request.user.username)
+    def get_serializer_class(self):
+        if self.action == 'partial_update' and self.kwargs['username'] == 'me':
+            return UserSerializerReadOnlyRole
+        return super().get_serializer_class()
+
+    # TODO version и другие доп аргументы - будет ошибка
+    def destroy(self, request, username):
+        if username == 'me':
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return super().destroy(self, request, username)
 
 
 @api_view(('POST',))
@@ -59,10 +70,10 @@ def signup(request):
 
     if serializer.is_valid():
         user = serializer.save()
-        user.is_active = False  # default in serializer
+        user.is_active = False  # TODO default in serializer
         user.save()
         token = default_token_generator.make_token(user)
-        # форматирование письма
+        # TODO форматирование письма  декоратор для токена и эмеил ?
         send_mail(
             "Your confirmation-code",
             token,
@@ -78,11 +89,13 @@ def signup(request):
 @permission_classes((AllowAny,))
 def token(request):
     serializer = UserTokenSerializer(data=request.data)
-    # перенести всё в валидацию сериалайзера.
+    # TODO перенести всё в валидацию сериалайзера.
     if serializer.is_valid():
         user = get_object_or_404(User, username=serializer.data['username'])
         confirmation_code = serializer.data['confirmation_code']
         if default_token_generator.check_token(user, confirmation_code):
+            user.is_active = True  # TODO default in serializer
+            user.save()
             refresh = RefreshToken.for_user(user)
             return Response(
                 {'token': str(refresh.access_token)}

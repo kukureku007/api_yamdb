@@ -1,13 +1,12 @@
 from django.urls import include, path
 from rest_framework import routers
-from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .views import (
     UserViewSet,
     CategoryViewSet,
     GenreViewSet,
     TitleViewSet,
-    UserMeViewSet,
+    # UserMeViewSet,
     signup,
     token
 )
@@ -19,15 +18,16 @@ router_v1 = routers.DefaultRouter()
 
 
 router_v1.register(
-    r'(?P<version>v1)/users',
+    # r'(?P<version>v1)/users',
+    r'v1/users',
     UserViewSet,
     basename='api-v1-user'
 )
-router_v1.register(
-    r'(?P<version>v1)/users/me',
-    UserMeViewSet,
-    basename='api-v1-me-user'
-)
+# router_v1.register(
+#     r'(?P<version>v1)/users/me',
+#     UserMeViewSet,
+#     basename='api-v1-me-user'
+# )
 router_v1.register(
     r'v1/categories',
     CategoryViewSet,
@@ -47,11 +47,6 @@ router_v1.register(
 urlpatterns = [
     path('v1/auth/signup/', signup, name='api-signup'),
     path('v1/auth/token/', token, name='api-token'),
-    # временный способ получения токенов
-    path(
-        'v1/auth/token-old/',
-        TokenObtainPairView.as_view(),
-        name='token_obtain_pair'
-    ),
+    # path('v1/users/me/', UserMeViewSet.as_view({'get': 'retrieve'})),
     path('', include(router_v1.urls)),
 ]
