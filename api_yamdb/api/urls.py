@@ -1,3 +1,4 @@
+from email.mime import base
 from django.urls import include, path
 from rest_framework import routers
 
@@ -6,6 +7,7 @@ from .views import (
     CategoryViewSet,
     GenreViewSet,
     TitleViewSet,
+    ReviewViewSet,
     signup,
     token
 )
@@ -14,6 +16,13 @@ from .views import (
 app_name = 'api'
 
 router_v1 = routers.DefaultRouter()
+
+
+router_v1.register(
+    r'v1/titles/(?P<title_id>\d+)/reviews',
+    ReviewViewSet,
+    basename='api-v1-review'
+)
 
 router_v1.register(
     r'(?P<version>v1)/users',
@@ -35,6 +44,8 @@ router_v1.register(
     TitleViewSet,
     basename='api-v1-title'
 )
+
+
 
 urlpatterns = [
     path('v1/auth/signup/', signup, name='api-signup'),

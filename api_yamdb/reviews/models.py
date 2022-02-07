@@ -66,8 +66,20 @@ class Title(models.Model):
 #    )
 
 
-class Review():
-    pass
+class Review(models.Model):
+    text = models.TextField()
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='reviews'
+    )
+    pub_date = models.DateTimeField(auto_now_add=True)
+    score = models.IntegerField()
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        related_name='reviews'
+    )
 
 
 class Comment():

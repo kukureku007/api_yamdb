@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.db.models import Avg
-from reviews.models import User, Category, Genre, Title
+from reviews.models import User, Category, Genre, Title, Review
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
@@ -105,10 +105,6 @@ class TitleGetSerializer(serializers.ModelSerializer):
             'category'
         )
 
-
-    
-
-
 class TitlePostSerializer(TitleGetSerializer):
 
     genre = serializers.SlugRelatedField(
@@ -123,3 +119,11 @@ class TitlePostSerializer(TitleGetSerializer):
     )
 
     # rating = serializers.SerializerMethodField()
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Review
+        fields = ('text', 'score', 'pub_date',)
+        
