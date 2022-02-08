@@ -1,9 +1,7 @@
-from api.filters import TitlesFilter
-from api.permissions import (AdminOnly, AuthorOnly,
-                             ModeratorAdminAuthor, ReadOnly)
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
+
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
@@ -11,13 +9,16 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+
 from reviews.models import Category, Genre, Title, User
 
-from .serializers import (CategorySerializer, GenreSerializer,
-                          ReviewSerializer, TitleGetSerializer,
-                          TitlePostSerializer, UserSerializer,
-                          UserSerializerReadOnlyRole, UserSignupSerializer,
-                          UserTokenSerializer, CommentSerializer)
+from .filters import TitlesFilter
+from .permissions import AdminOnly, AuthorOnly, ModeratorAdmin, ReadOnly
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, ReviewSerializer,
+                          TitleGetSerializer, TitlePostSerializer,
+                          UserSerializer, UserSerializerReadOnlyRole,
+                          UserSignupSerializer, UserTokenSerializer)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -158,7 +159,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
             return (AuthorOnly(),)
 
         if self.request.method == "DELETE":
-            return (ModeratorAdminAuthor(),)
+            return (ModeratorAdmin(),)
 
         return super().get_permissions()
 
@@ -186,13 +187,13 @@ class CommentViewSet(viewsets.ModelViewSet):
         )
 
     def get_permissions(self):
-        # if self.request.method == 'POST':
-        #     return (IsAuthenticated(),)
+        if self.request.method == 'POST':
+            return (IsAuthenticated(),)
 
         if self.request.method == "PATCH":
             return (AuthorOnly(),)
 
         if self.request.method == "DELETE":
-            return (ModeratorAdminAuthor(),)
+            return (ModeratorAdmin(),)
 
         return super().get_permissions()
