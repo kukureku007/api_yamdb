@@ -140,7 +140,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (AuthorOnly | ReadOnly, )
+    permission_classes = (AuthorOnly | ReadOnly,)
 
     def get_queryset(self):
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
@@ -187,9 +187,6 @@ class CommentViewSet(viewsets.ModelViewSet):
         )
 
     def get_permissions(self):
-        if self.request.method == 'POST':
-            return (IsAuthenticated(),)
-
         if self.request.method == "PATCH":
             return (AuthorOnly(),)
 
