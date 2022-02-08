@@ -4,7 +4,7 @@ from django.urls import include, path
 from rest_framework import routers
 
 from .views import (CategoryViewSet, GenreViewSet, ReviewViewSet, TitleViewSet,
-                    UserViewSet, signup, token)
+                    UserViewSet, CommentViewSet, signup, token)
 
 app_name = 'api'
 
@@ -36,6 +36,12 @@ router_v1.register(
     r'v1/titles',
     TitleViewSet,
     basename='api-v1-title'
+)
+router_v1.register(
+    r'(?P<version>v1)/titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
+    CommentViewSet,
+    basename='api-v1-titles'
+
 )
 
 urlpatterns = [

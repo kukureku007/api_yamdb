@@ -17,13 +17,7 @@ from .serializers import (CategorySerializer, GenreSerializer,
                           ReviewSerializer, TitleGetSerializer,
                           TitlePostSerializer, UserSerializer,
                           UserSerializerReadOnlyRole, UserSignupSerializer,
-                          UserTokenSerializer)
-
-# from rest_framework.decorators import api_view, permission_classes
-# from rest_framework.permissions import AllowAny
-# from rest_framework.response import Respo
-
-
+                          UserTokenSerializer, CommentSerializer)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -166,3 +160,20 @@ class ReviewViewSet(viewsets.ModelViewSet):
             return (DeletePartialUpdateModeratorAdminAuthor(),)
 
         return super().get_permissions()
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+    permission_classes = (AllowAny,)
+
+    def get_queryset(self):
+        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
+        review = get_object_or_404(title.reviews.all(), id=self.kwargs.get('review_id'))
+        return review.comments.all()
+
+    def get_permissions(self):
+        if self.action == 'create':
+            return (IsAuthenticated(),)
+        return super().get_permissions()
+
+    # r'(?P<version>v1)/titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',

@@ -5,7 +5,7 @@ from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from reviews.models import Category, Genre, Review, Title, User
+from reviews.models import Category, Genre, Review, Title, User, Comment
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -159,3 +159,15 @@ class ReviewSerializer(serializers.ModelSerializer):
                 'Введите число от 1 до 10'
             )
         return value
+
+class CommentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Comment
+        fields = (
+            'id',
+            'text',
+            'author',
+            'pub_date',
+        )
+        # exclude = ('review', )
