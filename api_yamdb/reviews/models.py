@@ -81,6 +81,5 @@ class Review(models.Model):
         related_name='reviews'
     )
 
-
 class Comment():
     pass

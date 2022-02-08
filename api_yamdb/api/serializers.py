@@ -4,6 +4,7 @@ from reviews.models import User, Category, Genre, Title, Review
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
+import datetime as dt
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -91,7 +92,7 @@ class TitleGetSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True)
     category = CategorySerializer()
 
-    # rating = serializers.SerializerMethodField()
+    rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Title
@@ -99,11 +100,23 @@ class TitleGetSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'year',
-            # 'rating'
+            'rating',
             'description',
             'genre',
             'category'
         )
+
+    def validate_year(self, value):
+        if value > dt.datetime.now().year:
+            raise serializers.ValidationError(
+                f'{value} год еще не наступил.'
+            )
+        return value
+
+    def get_rating(self, obj):
+        rating = obj.reviews.all().aggregate(Avg('score'))
+        return rating.get("score__avg")
+
 
 class TitlePostSerializer(TitleGetSerializer):
 
@@ -122,8 +135,12 @@ class TitlePostSerializer(TitleGetSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username'
+    )
 
     class Meta:
         model = Review
-        fields = ('text', 'score', 'pub_date',)
-        
+        fields = ('id', 'text', 'score', 'author', 'pub_date',)
+

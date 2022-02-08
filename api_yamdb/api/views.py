@@ -3,7 +3,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, filters
-from api.permissions import ReadOnly, AdminOnly
+from api.permissions import ReadOnly, AdminOnly, DeletePartialUpdateModeratorAdminAuthor, AuthorOnly, ReviewAuthorOnly
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.auth.tokens import default_token_generator
@@ -131,11 +131,9 @@ class GenreViewSet(CreateListViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    # queryset = Title.objects.all()
     permission_classes = (AdminOnly | ReadOnly,)
     pagination_class = PageNumberPagination
     filter_backends = (DjangoFilterBackend,)
-    #filterset_fields = ('year', 'name',)
     filterset_class = TitlesFilter
 
     def get_serializer_class(self):
@@ -154,9 +152,10 @@ class TitleViewSet(viewsets.ModelViewSet):
         return queryset
 
 
+
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (AuthorOnly | ReadOnly | ReviewAuthorOnly,)
 
     def get_queryset(self):
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
@@ -167,5 +166,13 @@ class ReviewViewSet(viewsets.ModelViewSet):
             author=self.request.user,
             title=get_object_or_404(
                 Title, id=self.kwargs.get('title_id')
-            )
-        )
+            ))
+
+    def get_permissions(self):
+        if self.request.method == "PATCH":
+            return (AuthorOnly(),)
+
+        if self.request.method == "DELETE":
+            return (DeletePartialUpdateModeratorAdminAuthor(),)
+
+        return super().get_permissions()
