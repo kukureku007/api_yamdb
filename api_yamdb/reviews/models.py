@@ -28,6 +28,9 @@ class Category(models.Model):
     name = models.CharField(max_length=50)
     slug = models.SlugField(unique=True)
 
+    class Meta:
+        ordering = ('name',)
+
 
 class Genre(models.Model):
     name = models.CharField(max_length=50)
@@ -35,6 +38,9 @@ class Genre(models.Model):
 
     def __str__(self):
         return self.slug
+
+    class Meta:
+        ordering = ('name',)
 
 
 class Title(models.Model):
@@ -52,18 +58,8 @@ class Title(models.Model):
         null=True
     )
 
-
-# class GenreTitle(models.Model):
-#     genre = models.ForeignKey(
-#         Genre,
-#         on_delete=models.SET_NULL,
-#        # null=True,
-#        blank=True
-#    )
-#    title = models.ForeignKey(
-#        Title,
-#        on_delete=models.CASCADE
-#    )
+    class Meta:
+        ordering = ('year',)
 
 
 class Review(models.Model):
@@ -80,6 +76,18 @@ class Review(models.Model):
         on_delete=models.CASCADE,
         related_name='reviews'
     )
+
+    class Meta:
+        constraints = (
+            models.UniqueConstraint(
+                fields=(
+                    'title', 'author'
+                ),
+                name=''
+            ),
+        )
+        ordering = ('-pub_date',)
+
 
 class Comment():
     pass

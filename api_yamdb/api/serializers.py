@@ -1,10 +1,11 @@
-from rest_framework import serializers
-from django.db.models import Avg
-from reviews.models import User, Category, Genre, Title, Review
-from rest_framework.validators import UniqueValidator
-from django.contrib.auth.tokens import default_token_generator
-from django.shortcuts import get_object_or_404
 import datetime as dt
+
+from django.contrib.auth.tokens import default_token_generator
+from django.db.models import Avg
+from django.shortcuts import get_object_or_404
+from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
+from reviews.models import Category, Genre, Review, Title, User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -142,5 +143,19 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = ('id', 'text', 'score', 'author', 'pub_date',)
+        fields = ('id', 'text', 'score', 'author', 'pub_date', )
 
+    def validate(self, data):
+        title_id = self.context['view'].kwargs.get('title_id')
+        user = self.context['request'].user
+        if self.context['request'].method == 'POST':
+            if Review.objects.filter(title=title_id, author=user).exists():
+                raise serializers.ValidationError('Вы уже оставляли отзыв!')
+        return data
+
+    def validate_score(self, value):
+        if value < 1 and value > 10:
+            raise serializers.ValidationError(
+                'Введите число от 1 до 10'
+            )
+        return value
