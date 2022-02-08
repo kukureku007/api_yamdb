@@ -1,5 +1,4 @@
 import datetime as dt
-
 from django.contrib.auth.tokens import default_token_generator
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
@@ -125,14 +124,12 @@ class TitlePostSerializer(TitleGetSerializer):
         queryset=Genre.objects.all(),
         slug_field='slug',
         many=True,
-        )
+    )
 
     category = serializers.SlugRelatedField(
         queryset=Category.objects.all(),
         slug_field='slug'
     )
-
-    # rating = serializers.SerializerMethodField()
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -160,7 +157,12 @@ class ReviewSerializer(serializers.ModelSerializer):
             )
         return value
 
+
 class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username'
+    )
 
     class Meta:
         model = Comment
@@ -170,4 +172,3 @@ class CommentSerializer(serializers.ModelSerializer):
             'author',
             'pub_date',
         )
-        # exclude = ('review', )

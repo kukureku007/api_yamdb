@@ -1,5 +1,3 @@
-from email.mime import base
-
 from django.urls import include, path
 from rest_framework import routers
 
@@ -38,7 +36,10 @@ router_v1.register(
     basename='api-v1-title'
 )
 router_v1.register(
-    r'(?P<version>v1)/titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
+    (
+        r'(?P<version>v1)/titles/'
+        r'(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments'
+    ),
     CommentViewSet,
     basename='api-v1-titles'
 

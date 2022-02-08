@@ -28,7 +28,8 @@ class AuthorOnly(permissions.BasePermission):
         return obj.author == request.user
 
 
-class DeletePartialUpdateModeratorAdminAuthor(permissions.BasePermission):
+# check author permission
+class ModeratorAdminAuthor(permissions.BasePermission):
     def has_permission(self, request, view):
         return (
             request.user.is_authenticated
