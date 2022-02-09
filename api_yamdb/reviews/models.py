@@ -55,12 +55,13 @@ class Title(models.Model):
         max_length=50,
         verbose_name='Произведение')
     year = models.PositiveIntegerField(
-            validators=[
-                MinValueValidator(1900), 
-                MaxValueValidator(datetime.now().year)],
-            help_text="Используйте следующий формат: <YYYY>",
-            verbose_name='Год.',
-            db_index=True
+        validators=[
+            MinValueValidator(1900),
+            MaxValueValidator(datetime.now().year)
+        ],
+        help_text="Используйте следующий формат: <YYYY>",
+        verbose_name='Год.',
+        db_index=True
     )
 
     description = models.TextField(

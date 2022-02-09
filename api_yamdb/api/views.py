@@ -3,7 +3,7 @@ from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins, status, viewsets
+from rest_framework import filters, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -19,6 +19,7 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           TitleGetSerializer, TitlePostSerializer,
                           UserSerializer, UserSerializerReadOnlyRole,
                           UserSignupSerializer, UserTokenSerializer)
+from .viewsets import CreateListViewSet
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -89,11 +90,6 @@ def token(request):
             {'token': str(refresh.access_token)}
         )
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class CreateListViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
-                        mixins.ListModelMixin, viewsets.GenericViewSet):
-    pass
 
 
 class CategoryViewSet(CreateListViewSet):
