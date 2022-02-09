@@ -7,7 +7,6 @@ class ReadOnly(permissions.BasePermission):
 
 
 class AdminOnly(permissions.BasePermission):
-
     def has_permission(self, request, view):
         return (
             request.user.is_authenticated
@@ -28,14 +27,14 @@ class AuthorOnly(permissions.BasePermission):
         return obj.author == request.user
 
 
-class DeletePartialUpdateModeratorAdminAuthor(permissions.BasePermission):
+class ModeratorAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         return (
             request.user.is_authenticated
             and (
-                request.user.role == request.user.ADMIN
+                request.user.role == request.user.MODERATOR
+                or request.user.role == request.user.ADMIN
                 or request.user.is_superuser
-                or request.user.role == request.user.MODERATOR
             )
         )
 

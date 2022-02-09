@@ -1,9 +1,7 @@
-from api.filters import TitlesFilter
-from api.permissions import (AdminOnly, AuthorOnly,
-                             DeletePartialUpdateModeratorAdminAuthor, ReadOnly)
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
+
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
@@ -11,17 +9,16 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+
 from reviews.models import Category, Genre, Title, User
 
-from .serializers import (CategorySerializer, GenreSerializer,
-                          ReviewSerializer, TitleGetSerializer,
-                          TitlePostSerializer, UserSerializer,
-                          UserSerializerReadOnlyRole, UserSignupSerializer,
-                          UserTokenSerializer)
-
-# from rest_framework.decorators import api_view, permission_classes
-# from rest_framework.permissions import AllowAny
-# from rest_framework.response import Respo
+from .filters import TitlesFilter
+from .permissions import AdminOnly, AuthorOnly, ModeratorAdmin, ReadOnly
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, ReviewSerializer,
+                          TitleGetSerializer, TitlePostSerializer,
+                          UserSerializer, UserSerializerReadOnlyRole,
+                          UserSignupSerializer, UserTokenSerializer)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -143,7 +140,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (AuthorOnly | ReadOnly, )
+    permission_classes = (AuthorOnly | ReadOnly,)
 
     def get_queryset(self):
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
@@ -154,13 +151,46 @@ class ReviewViewSet(viewsets.ModelViewSet):
             author=self.request.user,
             title=get_object_or_404(
                 Title, id=self.kwargs.get('title_id')
-            ))
+            )
+        )
 
     def get_permissions(self):
         if self.request.method == "PATCH":
             return (AuthorOnly(),)
 
         if self.request.method == "DELETE":
-            return (DeletePartialUpdateModeratorAdminAuthor(),)
+            return (ModeratorAdmin(),)
+
+        return super().get_permissions()
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+    permission_classes = (AuthorOnly | ReadOnly,)
+
+    def get_queryset(self):
+        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
+        review = get_object_or_404(
+            title.reviews.all(),
+            id=self.kwargs.get('review_id')
+        )
+        return review.comments.all()
+
+    def perform_create(self, serializer):
+        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
+        serializer.save(
+            author=self.request.user,
+            review=get_object_or_404(
+                title.reviews.all(),
+                id=self.kwargs.get('review_id')
+            )
+        )
+
+    def get_permissions(self):
+        if self.request.method == "PATCH":
+            return (AuthorOnly(),)
+
+        if self.request.method == "DELETE":
+            return (ModeratorAdmin(),)
 
         return super().get_permissions()

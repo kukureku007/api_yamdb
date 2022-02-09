@@ -16,5 +16,5 @@ class CustomUserAdmin(admin.ModelAdmin):
     )
     list_filter = ('date_joined',)
     empty_value_display = '-пусто-'
-    list_editable = ('role','is_staff')
+    list_editable = ('role', 'is_staff')
     pass

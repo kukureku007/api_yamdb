@@ -3,9 +3,11 @@ import datetime as dt
 from django.contrib.auth.tokens import default_token_generator
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
+
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from reviews.models import Category, Genre, Review, Title, User
+
+from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -125,7 +127,7 @@ class TitlePostSerializer(TitleGetSerializer):
         queryset=Genre.objects.all(),
         slug_field='slug',
         many=True,
-        )
+    )
 
     category = serializers.SlugRelatedField(
         queryset=Category.objects.all(),
@@ -157,3 +159,19 @@ class ReviewSerializer(serializers.ModelSerializer):
                 'Введите число от 1 до 10'
             )
         return value
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username'
+    )
+
+    class Meta:
+        model = Comment
+        fields = (
+            'id',
+            'text',
+            'author',
+            'pub_date',
+        )
