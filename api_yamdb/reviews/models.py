@@ -15,11 +15,13 @@ class User(AbstractUser):
         (ADMIN, 'admin'),
     ]
     role = models.CharField(
-        max_length=10,
+        'Автор',
+        max_length=100,
         choices=ROLE_CHOICES,
         default=USER,
     )
     bio = models.TextField(
+        'О себе',
         blank=True,
     )
 
@@ -115,16 +117,18 @@ class Review(models.Model):
 class Comment(models.Model):
     review = models.ForeignKey(
         Review,
+        verbose_name='Отзыв',
         on_delete=models.CASCADE,
         related_name='comments'
     )
-    text = models.TextField()
+    text = models.TextField('Текст')
     author = models.ForeignKey(
         User,
+        verbose_name='Автор',
         on_delete=models.CASCADE,
         related_name='comments'
     )
-    pub_date = models.DateTimeField(auto_now_add=True)
+    pub_date = models.DateTimeField('Опубликовано', auto_now_add=True)
 
     class Meta:
         ordering = ('-pub_date',)
