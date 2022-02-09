@@ -39,7 +39,7 @@ class Category(models.Model):
 class Genre(models.Model):
     name = models.CharField(
         max_length=50,
-        verbose_name='Название.',)
+        verbose_name='Название')
     slug = models.SlugField(unique=True)
 
     class Meta:
@@ -52,16 +52,13 @@ class Genre(models.Model):
 class Title(models.Model):
     name = models.CharField(
         max_length=50,
-        verbose_name='Произведение.')
-#    year = models.DateField(
-#        verbose_name='Год.',
-#        db_index=True,
-#    )
+        verbose_name='Произведение')
     year = models.PositiveIntegerField(
             validators=[
                 MinValueValidator(1900), 
                 MaxValueValidator(datetime.now().year)],
             help_text="Используйте следующий формат: <YYYY>",
+            verbose_name='Год.',
             db_index=True
     )
 
@@ -86,19 +83,19 @@ class Title(models.Model):
 
 
 class Review(models.Model):
-    text = models.TextField(verbose_name='Текст.')
+    text = models.TextField(verbose_name='Текст')
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='reviews'
     )
     pub_date = models.DateTimeField(auto_now_add=True)
-    score = models.IntegerField(verbose_name='Оценка.')
+    score = models.IntegerField(verbose_name='Оценка')
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
         related_name='reviews',
-        verbose_name='Произведение.'
+        verbose_name='Произведение'
     )
 
     class Meta:
