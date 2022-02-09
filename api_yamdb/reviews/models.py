@@ -1,5 +1,7 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
+from datetime import datetime
 
 
 class User(AbstractUser):
@@ -25,7 +27,9 @@ class User(AbstractUser):
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=50)
+    name = models.CharField(
+        max_length=50,
+        verbose_name='Название')
     slug = models.SlugField(unique=True)
 
     class Meta:
@@ -33,7 +37,9 @@ class Category(models.Model):
 
 
 class Genre(models.Model):
-    name = models.CharField(max_length=50)
+    name = models.CharField(
+        max_length=50,
+        verbose_name='Название.',)
     slug = models.SlugField(unique=True)
 
     class Meta:
@@ -44,16 +50,33 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
-    name = models.CharField(max_length=50)
-    year = models.IntegerField()
-    description = models.TextField(blank=True,)
+    name = models.CharField(
+        max_length=50,
+        verbose_name='Произведение.')
+#    year = models.DateField(
+#        verbose_name='Год.',
+#        db_index=True,
+#    )
+    year = models.PositiveIntegerField(
+            validators=[
+                MinValueValidator(1900), 
+                MaxValueValidator(datetime.now().year)],
+            help_text="Используйте следующий формат: <YYYY>",
+            db_index=True
+    )
+
+    description = models.TextField(
+        blank=True,
+        verbose_name='Описание')
     genre = models.ManyToManyField(
         Genre,
+        verbose_name='жанр'
     )
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
         related_name='titles',
+        verbose_name='Категории',
         blank=True,
         null=True
     )
@@ -63,18 +86,19 @@ class Title(models.Model):
 
 
 class Review(models.Model):
-    text = models.TextField()
+    text = models.TextField(verbose_name='Текст.')
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='reviews'
     )
     pub_date = models.DateTimeField(auto_now_add=True)
-    score = models.IntegerField()
+    score = models.IntegerField(verbose_name='Оценка.')
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
-        related_name='reviews'
+        related_name='reviews',
+        verbose_name='Произведение.'
     )
 
     class Meta:
@@ -83,7 +107,7 @@ class Review(models.Model):
                 fields=(
                     'title', 'author'
                 ),
-                name=''
+                name='На произведение уже оставлен отзыв данным автором.'
             ),
         )
         ordering = ('-pub_date',)
