@@ -1,9 +1,10 @@
 from django.contrib.auth.tokens import default_token_generator
+from django.conf import settings
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins, status, viewsets
+from rest_framework import filters, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -13,12 +14,27 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Genre, Title, User
 
 from .filters import TitlesFilter
+from .mixins import CreateListViewSet
 from .permissions import AdminOnly, AuthorOnly, ModeratorAdmin, ReadOnly
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
                           TitleGetSerializer, TitlePostSerializer,
                           UserSerializer, UserSerializerReadOnlyRole,
                           UserSignupSerializer, UserTokenSerializer)
+
+
+EMAIL_SERVER = settings.DEFAULT_SERVER_EMAIL
+EMAIL_THEME = 'Your confirmation-code'
+
+
+def send_token_to_user(user_email, token):
+    send_mail(
+        EMAIL_THEME,
+        token,
+        EMAIL_SERVER,
+        (user_email,),
+        fail_silently=False,
+    )
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -28,7 +44,6 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (AdminOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
-    # TODO username 'me' in CONST
 
     def get_permissions(self):
         if (
@@ -64,14 +79,7 @@ def signup(request):
         user.is_active = False
         user.save()
         token = default_token_generator.make_token(user)
-        # TODO форматирование письма  декоратор для токена и эмеил ?
-        send_mail(
-            "Your confirmation-code",
-            token,
-            "server-django@example.com",
-            [user.email],
-            fail_silently=False,
-        )
+        send_token_to_user(user.email, token)
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -89,11 +97,6 @@ def token(request):
             {'token': str(refresh.access_token)}
         )
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class CreateListViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
-                        mixins.ListModelMixin, viewsets.GenericViewSet):
-    pass
 
 
 class CategoryViewSet(CreateListViewSet):
