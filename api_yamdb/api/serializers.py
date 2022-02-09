@@ -132,8 +132,6 @@ class TitlePostSerializer(TitleGetSerializer):
         slug_field='slug'
     )
 
-    # rating = serializers.SerializerMethodField()
-
 
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(

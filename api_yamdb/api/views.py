@@ -24,8 +24,6 @@ from .serializers import (CategorySerializer, GenreSerializer,
 # from rest_framework.response import Respo
 
 
-
-
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
