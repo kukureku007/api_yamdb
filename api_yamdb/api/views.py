@@ -14,7 +14,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Genre, Title, User
 
 from .filters import TitlesFilter
-from .mixins import CreateListViewSet
 from .permissions import AdminOnly, AuthorOnly, ModeratorAdmin, ReadOnly
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
@@ -158,10 +157,10 @@ class ReviewViewSet(viewsets.ModelViewSet):
         )
 
     def get_permissions(self):
-        if self.request.method == "PATCH":
+        if self.request.method == 'PATCH':
             return (AuthorOnly(),)
 
-        if self.request.method == "DELETE":
+        if self.request.method == 'DELETE':
             return (ModeratorAdmin(),)
 
         return super().get_permissions()
@@ -190,10 +189,10 @@ class CommentViewSet(viewsets.ModelViewSet):
         )
 
     def get_permissions(self):
-        if self.request.method == "PATCH":
+        if self.request.method == 'PATCH':
             return (AuthorOnly(),)
 
-        if self.request.method == "DELETE":
+        if self.request.method == 'DELETE':
             return (ModeratorAdmin(),)
 
         return super().get_permissions()
