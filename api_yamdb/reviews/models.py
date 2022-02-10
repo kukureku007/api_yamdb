@@ -65,7 +65,7 @@ class Title(models.Model):
             MaxValueValidator(
                 datetime.now().year,
                 'Год издания не может превышать текущий.'
-            )     
+            )
         ],
         help_text='Используйте следующий формат: <YYYY>',
         verbose_name='Год.',
