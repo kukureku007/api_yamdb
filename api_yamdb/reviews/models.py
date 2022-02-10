@@ -58,10 +58,16 @@ class Title(models.Model):
         verbose_name='Произведение')
     year = models.PositiveIntegerField(
         validators=[
-            MinValueValidator(1900),
-            MaxValueValidator(datetime.now().year)
+            MinValueValidator(
+                1900,
+                'Выберите произведения изданные после 1900г.'
+            ),
+            MaxValueValidator(
+                datetime.now().year,
+                'Год издания не может превышать текущий.'
+            )     
         ],
-        help_text="Используйте следующий формат: <YYYY>",
+        help_text='Используйте следующий формат: <YYYY>',
         verbose_name='Год.',
         db_index=True
     )
