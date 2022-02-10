@@ -14,7 +14,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Genre, Title, User
 
 from .filters import TitlesFilter
-from .permissions import AdminOnly, AuthorOnly, ModeratorAdmin, ReadOnly, ModeratorAdminAuthor
+from .permissions import AdminOnly, ReadOnly, ModeratorAdminAuthor
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
                           TitleGetSerializer, TitlePostSerializer,
