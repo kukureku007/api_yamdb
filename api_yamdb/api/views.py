@@ -14,7 +14,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Genre, Title, User
 
 from .filters import TitlesFilter
-from .permissions import AdminOnly, AuthorOnly, ModeratorAdmin, ReadOnly
+from .permissions import AdminOnly, AuthorOnly, ModeratorAdmin, ReadOnly, ModeratorAdminAuthor
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
                           TitleGetSerializer, TitlePostSerializer,
@@ -142,7 +142,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (AuthorOnly | ReadOnly,)
+    permission_classes = (IsAuthenticated | ReadOnly,)
 
     def get_queryset(self):
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
@@ -158,17 +158,17 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.request.method == 'PATCH':
-            return (AuthorOnly(),)
+            return (ModeratorAdminAuthor(),)
 
         if self.request.method == 'DELETE':
-            return (ModeratorAdmin(),)
+            return (ModeratorAdminAuthor(),)
 
         return super().get_permissions()
 
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (AuthorOnly | ReadOnly,)
+    permission_classes = (IsAuthenticated | ReadOnly,)
 
     def get_queryset(self):
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
@@ -190,9 +190,9 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.request.method == 'PATCH':
-            return (AuthorOnly(),)
+            return (ModeratorAdminAuthor(),)
 
         if self.request.method == 'DELETE':
-            return (ModeratorAdmin(),)
+            return (ModeratorAdminAuthor(),)
 
         return super().get_permissions()

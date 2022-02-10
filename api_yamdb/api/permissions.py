@@ -39,11 +39,14 @@ class ModeratorAdmin(permissions.BasePermission):
         )
 
 
-class ReviewAuthorOnly(permissions.BasePermission):
+class ModeratorAdminAuthor(permissions.BasePermission):
     def has_permission(self, request, view):
-        return (
-            request.user.is_authenticated
-        )
+        return request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
-        return obj.reviews.author == request.user
+        return (
+            obj.author == request.user
+            or request.user.role == request.user.MODERATOR
+            or request.user.role == request.user.ADMIN
+            or request.user.is_superuser
+        )
