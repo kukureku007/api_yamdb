@@ -3,6 +3,7 @@ from datetime import datetime
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from .validators import validate_year
 
 
 class User(AbstractUser):
@@ -58,14 +59,7 @@ class Title(models.Model):
         verbose_name='Произведение')
     year = models.PositiveIntegerField(
         validators=[
-            MinValueValidator(
-                1900,
-                'Выберите произведения изданные после 1900г.'
-            ),
-            MaxValueValidator(
-                datetime.now().year,
-                'Год издания не может превышать текущий.'
-            )
+            validate_year
         ],
         help_text='Используйте следующий формат: <YYYY>',
         verbose_name='Год.',
