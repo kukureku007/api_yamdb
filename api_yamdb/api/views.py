@@ -157,10 +157,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         )
 
     def get_permissions(self):
-        if self.request.method == 'PATCH':
-            return (ModeratorAdminAuthor(),)
-
-        if self.request.method == 'DELETE':
+        if self.request.method in ('PATCH', 'DELETE'):
             return (ModeratorAdminAuthor(),)
 
         return super().get_permissions()
@@ -189,10 +186,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         )
 
     def get_permissions(self):
-        if self.request.method == 'PATCH':
-            return (ModeratorAdminAuthor(),)
-
-        if self.request.method == 'DELETE':
+        if self.request.method in ('PATCH', 'DELETE'):
             return (ModeratorAdminAuthor(),)
 
         return super().get_permissions()
